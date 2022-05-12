@@ -15,6 +15,7 @@ def get_message(sock):
         raise ValueError
     raise ValueError
 
+
 def send_message(sock, message):
     if not isinstance(message, dict):
         raise TypeError
