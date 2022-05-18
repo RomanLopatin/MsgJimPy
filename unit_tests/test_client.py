@@ -2,12 +2,13 @@ import os
 import unittest
 import sys
 
+sys.path.append(os.path.join(os.getcwd(), '..'))
+
 from client import create_presence, process_answer
 from server import process_client_message
 from common.variables import ACTION, PRESENCE, USER, ACCOUNT_NAME, RESPONSE, ERROR, TIME
 from common.utils import get_message, send_message
-
-sys.path.append(os.path.join(os.getcwd(), '..'))
+from errors import ReqFieldMissingError
 
 
 class TestClient(unittest.TestCase):
@@ -47,7 +48,7 @@ class TestClient(unittest.TestCase):
 
     def test_process_answer_raise_exception(self):
         """тест некорректного запроса (process_answer/Raise ValueError"""
-        self.assertRaises(ValueError, process_answer, {ERROR: 'Bad Request'})
+        self.assertRaises(ReqFieldMissingError, process_answer, {ERROR: 'Bad Request'})
 
 
 if __name__ == '__main__':
