@@ -3,6 +3,7 @@
 """
 
 import logging
+from logging import handlers as handlers
 
 # Создаём объект-логгер с именем app.server
 import os
@@ -15,8 +16,7 @@ SERVER_FORMATTER = logging.Formatter("%(asctime)s %(levelname)s %(filename)s %(m
 # Создаём файловый обработчик логирования:
 PATH = os.path.dirname(os.path.abspath(__file__))
 PATH = os.path.join(PATH, 'app.server.log')
-# FILE_HANDLER = logging.handlers.TimedRotatingFileHandler(PATH, encoding='utf-8', when="D", interval=1)
-FILE_HANDLER = logging.FileHandler(PATH, encoding='utf-8')
+FILE_HANDLER = handlers.TimedRotatingFileHandler(PATH, encoding='utf-8', when="D", interval=1)
 # Задаем форматтер для обработчика
 FILE_HANDLER.setFormatter(SERVER_FORMATTER)
 
