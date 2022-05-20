@@ -8,10 +8,12 @@ from common.variables import ACTION, PRESENCE, TIME, USER, ACCOUNT_NAME, RESPONS
     DEFAULT_IP_ADDRESS
 from common.utils import get_message, send_message
 from errors import ReqFieldMissingError
+from proj_decorators import func_to_log
 
 CLIENT_LOG = logging.getLogger('app.client')
 
 
+@func_to_log
 def create_presence(account_name='Guest'):
     out = {
         ACTION: PRESENCE,
@@ -24,6 +26,7 @@ def create_presence(account_name='Guest'):
     return out
 
 
+@func_to_log
 def process_answer(message):
     CLIENT_LOG.debug(f'Обработка сообщения от сервера: {message}')
     if RESPONSE in message:

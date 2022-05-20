@@ -9,10 +9,12 @@ from common.variables import ACTION, PRESENCE, USER, ACCOUNT_NAME, RESPONSE, ERR
 
 from common.utils import get_message, send_message
 from errors import IncorrectDataRecivedError
+from proj_decorators import func_to_log
 
 SERVER_LOG = logging.getLogger('app.server')
 
 
+@func_to_log
 def process_client_message(message):
     SERVER_LOG.debug(f'Вызов ф-ии process_client_message(). Разбор сообщения от клиента : {message}')
     if ACTION in message and message[ACTION] == PRESENCE and TIME in message \
