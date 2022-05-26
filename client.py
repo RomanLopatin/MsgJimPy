@@ -5,7 +5,7 @@ import socket
 import sys
 import time
 from common.variables import ACTION, PRESENCE, TIME, USER, ACCOUNT_NAME, RESPONSE, ERROR, DEFAULT_PORT, \
-    DEFAULT_IP_ADDRESS
+    DEFAULT_IP_ADDRESS, MESSAGE, MESSAGE_TEXT, SENDER
 from common.utils import get_message, send_message
 from errors import ReqFieldMissingError
 from proj_decorators import func_to_log
@@ -27,6 +27,27 @@ def create_presence(account_name='Guest'):
 
 
 @func_to_log
+def create_message(sock, account_name='Guest'):
+    """Функция запрашивает текст сообщения и возвращает его.
+    Так же завершает работу при вводе подобной комманды
+    """
+    message = input('Введите сообщение для отправки или \'!!!\' для завершения работы: ')
+    if message == '!!!':
+        sock.close()
+        CLIENT_LOG.info('Завершение работы по команде пользователя.')
+        print('Спасибо за использование нашего сервиса!')
+        sys.exit(0)
+    message_dict = {
+        ACTION: MESSAGE,
+        TIME: time.time(),
+        ACCOUNT_NAME: account_name,
+        MESSAGE_TEXT: message
+    }
+    CLIENT_LOG.debug(f'Сформировали сообщение: {message_dict}')
+    return message_dict
+
+
+@func_to_log
 def process_answer(message):
     CLIENT_LOG.debug(f'Обработка сообщения от сервера: {message}')
     if RESPONSE in message:
@@ -36,6 +57,18 @@ def process_answer(message):
             return f'400: {message[ERROR]}'
     CLIENT_LOG.error(f'{ReqFieldMissingError(RESPONSE)}')
     raise ReqFieldMissingError(RESPONSE)
+
+
+@func_to_log
+def message_from_server(message):
+    """Функция - обработчик сообщений других пользователей, поступающих с сервера"""
+    if ACTION in message and message[ACTION] == MESSAGE and SENDER in message and MESSAGE_TEXT in message:
+        print(f'Получено сообщение от пользователя '
+              f'{message[SENDER]}:\n{message[MESSAGE_TEXT]}')
+        CLIENT_LOG.info(f'Получено сообщение от пользователя '
+                    f'{message[SENDER]}:\n{message[MESSAGE_TEXT]}')
+    else:
+        CLIENT_LOG.error(f'Получено некорректное сообщение с сервера: {message}')
 
 
 def main():
@@ -72,6 +105,37 @@ def main():
     except ConnectionRefusedError:
         CLIENT_LOG.critical(f'Не удалось подключиться к серверу {server_address}:{server_port}, '
                             f'конечный компьютер отверг запрос на подключение.')
+    else:
+        # Если соединение с сервером установлено корректно,
+        # начинаем обмен с ним, согласно требуемому режиму.
+        # основной цикл прогрммы:
+        client_mode = ''
+        if '-m' in sys.argv:
+            client_mode = sys.argv[sys.argv.index('-m') + 1]
+        if client_mode not in ('listen', 'send'):
+            CLIENT_LOG.critical(f'Указан недопустимый режим работы {client_mode}, возможны режимы: listen, send')
+            sys.exit(1)
+        if client_mode == 'send':
+            print(f'Запущен консольный клиент. Режим работы - отправка сообщений.')
+        else:
+            print('Запущен консольный клиент. Режим работы - приём сообщений.')
+
+        while True:
+            # режим работы - отправка сообщений
+            if client_mode == 'send':
+                try:
+                    msg_to_server = create_message(client_sock)
+                    send_message(client_sock, msg_to_server)
+                except (ConnectionResetError, ConnectionError, ConnectionAbortedError):
+                    CLIENT_LOG.error(f'Соединение с сервером {server_address} было потеряно.')
+                    sys.exit(1)
+                    # Режим работы приём:
+            if client_mode == 'listen':
+                try:
+                    message_from_server(get_message(client_sock))
+                except (ConnectionResetError, ConnectionError, ConnectionAbortedError):
+                    CLIENT_LOG.error(f'Соединение с сервером {server_address} было потеряно.')
+                    sys.exit(1)
 
 
 if __name__ == '__main__':
