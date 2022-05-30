@@ -13,16 +13,11 @@ while True:
     elif ACTION == 's':
         PROCESS.append(subprocess.Popen('python server.py',
                                         creationflags=subprocess.CREATE_NEW_CONSOLE))
-        # for i in range(2):
-        #     PROCESS.append(subprocess.Popen('python client.py',
-        #                                     creationflags=subprocess.CREATE_NEW_CONSOLE))
 
-        for i in range(2):
-            PROCESS.append(subprocess.Popen('python client.py 127.0.0.1 7777 -m send',
+        for i in range(1):
+            PROCESS.append(subprocess.Popen(f'python client.py 127.0.0.1 7777 -n test_{i + 1} ',
                                             creationflags=subprocess.CREATE_NEW_CONSOLE))
-        for i in range(3):
-            PROCESS.append(subprocess.Popen('python client.py 127.0.0.1 7777 -m listen',
-                                            creationflags=subprocess.CREATE_NEW_CONSOLE))
+
     elif ACTION == 'x':
         while PROCESS:
             VICTIM = PROCESS.pop()
