@@ -10,69 +10,28 @@ from common.variables import ACTION, PRESENCE, USER, ACCOUNT_NAME, RESPONSE, ERR
     DEFAULT_PORT, MAX_CONNECTIONS, TIME, MESSAGE_TEXT, MESSAGE, SENDER, MESSAGE_RECEIVER, EXIT
 
 from common.utils import get_message, send_message
+from descriptors import PortDescriptor
 from errors import IncorrectDataRecivedError
+from metaclasses import ServerVerifier
 from proj_decorators import func_to_log
 
 SERVER_LOG = logging.getLogger('app.server')
 
 
 @func_to_log
-def process_client_message(message, messages_list, client, all_client_socks, names):
-    SERVER_LOG.debug(f'Вызов ф-ии process_client_message(). Разбор сообщения от клиента : {message}')
-    # Если это сообщение о присутствии (PRESENCE), принимаем его и отвечаем
-    if ACTION in message and message[ACTION] == PRESENCE and TIME in message \
-            and USER in message:
-        acc_name = message[USER][ACCOUNT_NAME]
-        if acc_name not in names.keys():
-            names[acc_name] = client
-            SERVER_LOG.debug(f'Добавили запись в таблицу имен : {acc_name}: {names[acc_name]}')
-        else:
-            response = {RESPONSE: 400, ERROR: 'Имя пользователя уже занято.'}
-            send_message(client, response)
-            all_client_socks.remove(client)
-            client.close()
-        msg = {RESPONSE: 200}
-        send_message(client, msg)
-        return
-        # Если это сообщение (MESSAGE), то добавляем его в список сообщений.
-    elif ACTION in message and message[ACTION] == MESSAGE and \
-            TIME in message and MESSAGE_TEXT in message and message[MESSAGE_RECEIVER]:
-        messages_list.append((message[ACCOUNT_NAME], message[MESSAGE_TEXT], message[MESSAGE_RECEIVER]))
-        return
-    elif ACTION in message and message[ACTION] == EXIT and ACCOUNT_NAME in message:
-        all_client_socks.remove(names[message[ACCOUNT_NAME]])
-        names[message[ACCOUNT_NAME]].close()
-        del names[message[ACCOUNT_NAME]]
-        return
-    else:
-        msg = {
-            RESPONSE: 400,
-            ERROR: 'Bad request'
-        }
-        send_message(msg, client)
-        return
-
-
-def main():
+def serv_arg_parser():
     """
-    Сперва пытаемся обработать параметры командной строки (address_to_listen и port_to_listen).
-    Если не удается - используем значения по умолчанию
-    server.py -p 8888 -a 127.0.0.1
-    """
+           Сперва пытаемся обработать параметры командной строки (address_to_listen и port_to_listen).
+           Если не удается - используем значения по умолчанию
+           server.py -p 8888 -a 127.0.0.1
+           """
     try:
         if '-p' in sys.argv:
-            port_to_listen = int(sys.argv[sys.argv.index('-p') + 1])
+            port_to_listen = sys.argv[sys.argv.index('-p') + 1]
         else:
             port_to_listen = DEFAULT_PORT
-        if port_to_listen < 1024 or port_to_listen > 65535:
-            raise ValueError
     except IndexError:
-        # print("Index error (port value should be defined!)")
         SERVER_LOG.error('Index error (port value should be defined!)')
-        sys.exit(1)
-    except ValueError:
-        # print("Value error (port value should be in range 1024-65535!)")
-        SERVER_LOG.error('Value error (port value should be in range 1024-65535!)')
         sys.exit(1)
 
     try:
@@ -85,99 +44,160 @@ def main():
         SERVER_LOG.error('Index error (address)')
         sys.exit(1)
 
-    msg_for_log = f'Запущен сервер, порт для подключений: {port_to_listen}, ' \
+    msg_for_log = f'Запускаем сервер, порт для подключений: {port_to_listen}, ' \
                   f'адрес с которого принимаются подключения: {address_to_listen}.'
 
     SERVER_LOG.info(msg_for_log)
     print(msg_for_log)
 
-    # Инициализация пустого списка клиентов
-    all_client_socks = []
-    messages = []
-    names = dict()  # {client_name: client_socket}
+    return address_to_listen, port_to_listen
 
-    # Инициализация сокета и обмен
-    serv_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serv_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    serv_sock.bind((address_to_listen, port_to_listen))
-    serv_sock.listen(MAX_CONNECTIONS)
-    serv_sock.settimeout(1)
 
-    while True:
-        try:
-            client_sock, client_address = serv_sock.accept()
-            SERVER_LOG.info(f'Установили соедение с клиентом по адресу: {client_address}')
-        except OSError as err:
-            pass
-        else:
-            print(f"Получен запрос на соединение от {str(client_address)}")
-            SERVER_LOG.debug(f"Получен запрос на соединение от {client_address}")
-            all_client_socks.append(client_sock)
-        finally:
-            wait = 0
-            client_socks_to_read = []
-            client_socks_to_write = []
+class Server(metaclass=ServerVerifier):
+    port_to_listen = PortDescriptor()
+
+    def __init__(self, port_to_listen, address_to_listen):
+        self.port_to_listen = port_to_listen
+        self.address_to_listen = address_to_listen
+
+        # Инициализация пустого списка клиентов
+        self.all_client_socks = []
+
+        self.messages = []
+
+        self.names = dict()  # {client_name: client_socket}
+
+    def socket_init(self):
+        # Инициализация сокета и обмен
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind((self.address_to_listen, self.port_to_listen))
+        sock.settimeout(1)
+        self.serv_sock = sock
+        self.serv_sock.listen(MAX_CONNECTIONS)
+
+    def serv_main(self):
+
+        self.socket_init()
+
+        while True:
             try:
-                if all_client_socks:
-                    client_socks_to_read, client_socks_to_write, errors = select(all_client_socks, all_client_socks, [],
-                                                                                 wait)
-                    # print(client_socks_to_read)
-                    # print(client_socks_to_write)
-            except Exception as e:
-                print(e)
-
-            if client_socks_to_read:
-                for client_sock_to_read in client_socks_to_read:
-                    message_from_client = ''
-                    try:
-                        message_from_client = get_message(client_sock_to_read)
-                        print(f'Получено сообщение от клиента: {message_from_client}')
-                        SERVER_LOG.debug(f'Получено сообщение от клиента: {message_from_client}')
-                        process_client_message(message_from_client, messages, client_sock_to_read, all_client_socks,
-                                               names)
-                    except json.JSONDecodeError:
-                        SERVER_LOG.error(f'Не удалось декодировать JSON строку, полученную от '
-                                         f'клиента {client_sock_to_read.getpeername()} ({message_from_client})')
-                        client_sock_to_read.close()
-                        all_client_socks.remove(client_sock_to_read)
-                    except IncorrectDataRecivedError:
-                        SERVER_LOG.error(f'От клиента {client_sock_to_read.getpeername()} приняты некорректные данные.'
-                                         f'Соединение закрывается.')
-                        client_sock_to_read.close()
-                        all_client_socks.remove(client_sock_to_read)
-                    except ValueError:
-                        SERVER_LOG.error(
-                            f'Некорр. сообщение (ValueError) от клиента  {client_sock_to_read.getpeername()} ({message_from_client})')
-                        client_sock_to_read.close()
-                        all_client_socks.remove(client_sock_to_read)
-
-            # Если есть сообщения для отправки и ожидающие клиенты, отправляем им сообщение.
-            if messages and client_socks_to_write:
-                msg_receiver = messages[0][2]
+                client_sock, client_address = self.serv_sock.accept()
+                SERVER_LOG.info(f'Установили соедение с клиентом по адресу: {client_address}')
+            except OSError as err:
+                pass
+            else:
+                print(f"Получен запрос на соединение от {str(client_address)}")
+                SERVER_LOG.debug(f"Получен запрос на соединение от {client_address}")
+                self.all_client_socks.append(client_sock)
+            finally:
+                wait = 0
+                client_socks_to_read = []
+                client_socks_to_write = []
                 try:
-                    client_sock_to_write = names[msg_receiver]
-                except KeyError:
-                    SERVER_LOG.info(f'Клиент c именем {msg_receiver} не зарегистрирован!')
-                    print(f' Неверные данные получателя. Клиент c именем {msg_receiver} не зарегистрирован!')
-                    del messages[0]
-                else:
-                    if client_sock_to_write in client_socks_to_write:
-                        message = {
-                            ACTION: MESSAGE,
-                            SENDER: messages[0][0],
-                            TIME: time.time(),
-                            MESSAGE_TEXT: messages[0][1],
-                            MESSAGE_RECEIVER: msg_receiver
-                        }
-                        del messages[0]
+                    if self.all_client_socks:
+                        client_socks_to_read, client_socks_to_write, errors = select(self.all_client_socks,
+                                                                                     self.all_client_socks, [], wait)
+                        # print(client_socks_to_read)
+                        # print(client_socks_to_write)
+                except Exception as e:
+                    print(e)
 
+                if client_socks_to_read:
+                    for client_sock_to_read in client_socks_to_read:
+                        message_from_client = ''
                         try:
-                            send_message(client_sock_to_write, message)
-                            print(f'Клиенту {client_sock_to_write.getpeername()} отправлено сообщение {message}')
-                        except:
-                            SERVER_LOG.info(f'Клиент {client_sock_to_write.getpeername()} отключился от сервера.')
-                            client_sock_to_write.close()
-                            all_client_socks.remove(client_sock_to_write)
+                            message_from_client = get_message(client_sock_to_read)
+                            print(f'Получено сообщение от клиента: {message_from_client}')
+                            SERVER_LOG.debug(f'Получено сообщение от клиента: {message_from_client}')
+                            self.process_client_message(message_from_client, self.messages, client_sock_to_read,
+                                                        self.all_client_socks, self.names)
+                        except json.JSONDecodeError:
+                            SERVER_LOG.error(f'Не удалось декодировать JSON строку, полученную от '
+                                             f'клиента {client_sock_to_read.getpeername()} ({message_from_client})')
+                            client_sock_to_read.close()
+                            self.all_client_socks.remove(client_sock_to_read)
+                        except IncorrectDataRecivedError:
+                            SERVER_LOG.error(
+                                f'От клиента {client_sock_to_read.getpeername()} приняты некорректные данные.'
+                                f'Соединение закрывается.')
+                            client_sock_to_read.close()
+                            self.all_client_socks.remove(client_sock_to_read)
+                        except ValueError:
+                            SERVER_LOG.error(
+                                f'Некорр. сообщение (ValueError) от клиента  {client_sock_to_read.getpeername()} ({message_from_client})')
+                            client_sock_to_read.close()
+                            self.all_client_socks.remove(client_sock_to_read)
+
+                # Если есть сообщения для отправки и ожидающие клиенты, отправляем им сообщение.
+                if self.messages and client_socks_to_write:
+                    msg_receiver = self.messages[0][2]
+                    try:
+                        client_sock_to_write = self.names[msg_receiver]
+                    except KeyError:
+                        SERVER_LOG.info(f'Клиент c именем {msg_receiver} не зарегистрирован!')
+                        print(f' Неверные данные получателя. Клиент c именем {msg_receiver} не зарегистрирован!')
+                        del self.messages[0]
+                    else:
+                        if client_sock_to_write in client_socks_to_write:
+                            message = {
+                                ACTION: MESSAGE,
+                                SENDER: self.messages[0][0],
+                                TIME: time.time(),
+                                MESSAGE_TEXT: self.messages[0][1],
+                                MESSAGE_RECEIVER: msg_receiver
+                            }
+                            del self.messages[0]
+
+                            try:
+                                send_message(client_sock_to_write, message)
+                                print(f'Клиенту {client_sock_to_write.getpeername()} отправлено сообщение {message}')
+                            except:
+                                SERVER_LOG.info(f'Клиент {client_sock_to_write.getpeername()} отключился от сервера.')
+                                client_sock_to_write.close()
+                                self.all_client_socks.remove(client_sock_to_write)
+
+    @func_to_log
+    def process_client_message(self, message, messages_list, client, all_client_socks, names):
+        SERVER_LOG.debug(f'Вызов ф-ии process_client_message(). Разбор сообщения от клиента : {message}')
+        # Если это сообщение о присутствии (PRESENCE), принимаем его и отвечаем
+        if ACTION in message and message[ACTION] == PRESENCE and TIME in message \
+                and USER in message:
+            acc_name = message[USER][ACCOUNT_NAME]
+            if acc_name not in names.keys():
+                names[acc_name] = client
+                SERVER_LOG.debug(f'Добавили запись в таблицу имен : {acc_name}: {names[acc_name]}')
+            else:
+                response = {RESPONSE: 400, ERROR: 'Имя пользователя уже занято.'}
+                send_message(client, response)
+                all_client_socks.remove(client)
+                client.close()
+            msg = {RESPONSE: 200}
+            send_message(client, msg)
+            return
+            # Если это сообщение (MESSAGE), то добавляем его в список сообщений.
+        elif ACTION in message and message[ACTION] == MESSAGE and \
+                TIME in message and MESSAGE_TEXT in message and message[MESSAGE_RECEIVER]:
+            messages_list.append((message[ACCOUNT_NAME], message[MESSAGE_TEXT], message[MESSAGE_RECEIVER]))
+            return
+        elif ACTION in message and message[ACTION] == EXIT and ACCOUNT_NAME in message:
+            all_client_socks.remove(names[message[ACCOUNT_NAME]])
+            names[message[ACCOUNT_NAME]].close()
+            del names[message[ACCOUNT_NAME]]
+            return
+        else:
+            msg = {
+                RESPONSE: 400,
+                ERROR: 'Bad request'
+            }
+            send_message(msg, client)
+            return
+
+
+def main():
+    address_to_listen, port_to_listen = serv_arg_parser()
+    server = Server(port_to_listen, address_to_listen)
+    server.serv_main()
 
 
 if __name__ == '__main__':
