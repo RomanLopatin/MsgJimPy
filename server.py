@@ -1,5 +1,12 @@
+from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, DateTime
+from sqlalchemy.orm import mapper, sessionmaker
+from common.variables import SERVER_DB
+import datetime
+
+#
 import json
 import logging
+import threading
 from select import select
 
 import logs.server_log_config
@@ -14,6 +21,9 @@ from descriptors import PortDescriptor
 from errors import IncorrectDataRecivedError
 from metaclasses import ServerVerifier
 from proj_decorators import func_to_log
+
+from server_db import ServerStorage
+
 
 SERVER_LOG = logging.getLogger('app.server')
 
@@ -40,7 +50,6 @@ def serv_arg_parser():
         else:
             address_to_listen = ''
     except IndexError:
-        # print("Index error (address)")
         SERVER_LOG.error('Index error (address)')
         sys.exit(1)
 
@@ -48,15 +57,16 @@ def serv_arg_parser():
                   f'адрес с которого принимаются подключения: {address_to_listen}.'
 
     SERVER_LOG.info(msg_for_log)
-    print(msg_for_log)
+    # print(msg_for_log)
 
     return address_to_listen, port_to_listen
 
 
-class Server(metaclass=ServerVerifier):
+class Server(threading.Thread, metaclass=ServerVerifier):
+
     port_to_listen = PortDescriptor()
 
-    def __init__(self, port_to_listen, address_to_listen):
+    def __init__(self, port_to_listen, address_to_listen, database):
         self.port_to_listen = port_to_listen
         self.address_to_listen = address_to_listen
 
@@ -67,6 +77,12 @@ class Server(metaclass=ServerVerifier):
 
         self.names = dict()  # {client_name: client_socket}
 
+        # База данных сервера
+        self.database = database
+
+        # Конструктор предка
+        super().__init__()
+
     def socket_init(self):
         # Инициализация сокета и обмен
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -76,7 +92,7 @@ class Server(metaclass=ServerVerifier):
         self.serv_sock = sock
         self.serv_sock.listen(MAX_CONNECTIONS)
 
-    def serv_main(self):
+    def run(self):
 
         self.socket_init()
 
@@ -98,8 +114,6 @@ class Server(metaclass=ServerVerifier):
                     if self.all_client_socks:
                         client_socks_to_read, client_socks_to_write, errors = select(self.all_client_socks,
                                                                                      self.all_client_socks, [], wait)
-                        # print(client_socks_to_read)
-                        # print(client_socks_to_write)
                 except Exception as e:
                     print(e)
 
@@ -167,13 +181,17 @@ class Server(metaclass=ServerVerifier):
             if acc_name not in names.keys():
                 names[acc_name] = client
                 SERVER_LOG.debug(f'Добавили запись в таблицу имен : {acc_name}: {names[acc_name]}')
+                client_ip, client_port = client.getpeername()
+                self.database.user_login(acc_name, client_ip, client_port)
+                SERVER_LOG.debug(f'Добавили запись о новом пользователе таблицу БД user_login :'
+                                 f' username/ip_address/port : {acc_name}/{client_ip}/{client_port}')
+                msg = {RESPONSE: 200}
+                send_message(client, msg)
             else:
                 response = {RESPONSE: 400, ERROR: 'Имя пользователя уже занято.'}
                 send_message(client, response)
                 all_client_socks.remove(client)
                 client.close()
-            msg = {RESPONSE: 200}
-            send_message(client, msg)
             return
             # Если это сообщение (MESSAGE), то добавляем его в список сообщений.
         elif ACTION in message and message[ACTION] == MESSAGE and \
@@ -181,6 +199,7 @@ class Server(metaclass=ServerVerifier):
             messages_list.append((message[ACCOUNT_NAME], message[MESSAGE_TEXT], message[MESSAGE_RECEIVER]))
             return
         elif ACTION in message and message[ACTION] == EXIT and ACCOUNT_NAME in message:
+            self.database.user_logout(message[ACCOUNT_NAME])
             all_client_socks.remove(names[message[ACCOUNT_NAME]])
             names[message[ACCOUNT_NAME]].close()
             del names[message[ACCOUNT_NAME]]
@@ -194,10 +213,49 @@ class Server(metaclass=ServerVerifier):
             return
 
 
+def print_help():
+    print('Поддерживаемые комманды:')
+    print('users - список известных пользователей')
+    print('connected - список подключённых пользователей')
+    print('loghist - история входов пользователя')
+    print('exit - завершение работы сервера.')
+    print('help - вывод справки по поддерживаемым командам')
+
+
 def main():
+    database = ServerStorage()
+
     address_to_listen, port_to_listen = serv_arg_parser()
-    server = Server(port_to_listen, address_to_listen)
-    server.serv_main()
+    server = Server(port_to_listen, address_to_listen, database)
+    server.daemon = True
+    server.start()
+
+    print_help()
+
+    # Основной цикл сервера:
+    while True:
+        command = input('Введите команду: ')
+        if command == 'help':
+            print_help()
+        elif command == 'exit':
+            break
+        elif command == 'users':
+            for user in sorted(database.users_list()):
+                print(f'Пользователь {user[0]}, последний вход: {user[1]}')
+        elif command == 'connected':
+            active_users = database.active_users_list()
+            if active_users:
+                for user in sorted(active_users):
+                    print(f'Пользователь {user[0]}, подключен: {user[1]}:{user[2]}, время установки соединения: {user[3]}')
+            else:
+                print('Активные пользователи отсутствуют.')
+        elif command == 'loghist':
+            name = input('Введите имя пользователя для просмотра истории.\n '
+                         'Для вывода всей истории, просто нажмите Enter: ')
+            for user in sorted(database.login_history(name)):
+                print(f'Пользователь: {user[0]} время входа: {user[1]}. Вход с: {user[2]}:{user[3]}')
+        else:
+            print('Команда не распознана.')
 
 
 if __name__ == '__main__':

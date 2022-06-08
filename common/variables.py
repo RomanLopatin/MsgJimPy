@@ -17,3 +17,5 @@ MESSAGE_TEXT = 'mess_text'
 SENDER = 'sender'
 MESSAGE_RECEIVER = 'message_receiver'
 EXIT = 'exit'
+
+SERVER_DB = 'sqlite:///server_db.db3'

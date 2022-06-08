@@ -96,6 +96,7 @@ class Client(metaclass=ClientVerifier):
     @func_to_log
     def send_user_message(self, client_sock):
         time.sleep(0.5)
+        CLIENT_LOG.debug('Зашли в функцию Send_user_message.')
         self.print_help()
         while True:
             command = input('Введите команду:\n')
