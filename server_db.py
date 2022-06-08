@@ -150,5 +150,19 @@ if __name__ == '__main__':
     # Тестируем создание БД
     test_db = ServerStorage()
     # Далее тестируем ф-ии работы с БД
-    test_db.user_login('client_1', '192.168.1.4', 8080)
-    test_db.user_login('client_2', '192.168.1.5', 7777)
+    print('user_login()')
+    test_db.user_login('client_1', '192.168.0.1', 8000)
+    test_db.user_login('client_2', '192.168.10.10', 7000)
+    #
+    print('active_users_list()')
+    print(test_db.active_users_list())
+    #
+    test_db.user_logout('client_1')
+    print(' ---- test_db.active_users_list() after logout client_1 ----')
+    print(test_db.active_users_list())
+    #
+    print('login_history(client_1)')
+    print(test_db.login_history('client_1'))
+    #
+    print('users_list()')
+    print(test_db.users_list())
