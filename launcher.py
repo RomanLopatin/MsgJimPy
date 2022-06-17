@@ -1,6 +1,7 @@
 """Лаунчер"""
 
 import subprocess
+from time import sleep
 
 PROCESS = []
 
@@ -16,10 +17,11 @@ while True:
         except ValueError:
             client_num = 2
 
-        # PROCESS.append(subprocess.Popen('python server.py -p 7777 -a 127.0.0.1',
-        #                                 creationflags=subprocess.CREATE_NEW_CONSOLE))
+        PROCESS.append(subprocess.Popen('python server.py -p 7777 -a 127.0.0.1',
+                                        creationflags=subprocess.CREATE_NEW_CONSOLE))
 
         for i in range(client_num):
+            sleep(1)
             PROCESS.append(subprocess.Popen(f'python client.py 127.0.0.1 7777 -n test_{i + 1} ',
                                             creationflags=subprocess.CREATE_NEW_CONSOLE))
 
