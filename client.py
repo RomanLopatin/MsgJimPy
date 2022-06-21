@@ -2,17 +2,16 @@ import json
 import logging
 import threading
 
-import logs.client_log_config
 import socket
 import sys
 import time
 
-from client_db import ClientDatabase
+from client.client_db import ClientDatabase
 from common.variables import ACTION, PRESENCE, TIME, USER, ACCOUNT_NAME, RESPONSE, ERROR, DEFAULT_PORT, \
     DEFAULT_IP_ADDRESS, MESSAGE, MESSAGE_TEXT, SENDER, MESSAGE_RECEIVER, EXIT, USERS_REQUEST, LIST_INFO, REMOVE_CONTACT, \
     ADD_CONTACT, GET_CONTACTS
 from common.utils import get_message, send_message
-from errors import ReqFieldMissingError, IncorrectDataRecivedError, ServerError
+from common.errors import ReqFieldMissingError, IncorrectDataRecivedError, ServerError
 from metaclasses import ClientVerifier
 from proj_decorators import func_to_log
 

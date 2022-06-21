@@ -2,19 +2,14 @@ import configparser
 
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QMessageBox
-from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, DateTime
-from sqlalchemy.orm import mapper, sessionmaker
-from common.variables import SERVER_DB, RESPONSE_202, LIST_INFO, RESPONSE_400, GET_CONTACTS, ADD_CONTACT, RESPONSE_200, \
+from common.variables import RESPONSE_202, LIST_INFO, GET_CONTACTS, ADD_CONTACT, RESPONSE_200, \
     REMOVE_CONTACT, USERS_REQUEST
-import datetime
 
 #
-import json
 import logging
 import threading
 from select import select
 
-import logs.server_log_config
 import socket
 import sys, os
 import time
@@ -23,7 +18,6 @@ from common.variables import ACTION, PRESENCE, USER, ACCOUNT_NAME, RESPONSE, ERR
 
 from common.utils import get_message, send_message
 from descriptors import PortDescriptor
-from errors import IncorrectDataRecivedError
 from metaclasses import ServerVerifier
 from proj_decorators import func_to_log
 

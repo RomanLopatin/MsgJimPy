@@ -1,7 +1,6 @@
 import json
-import socket
 from common.variables import MAX_PACKAGE_LENGTH, ENCODING
-from errors import IncorrectDataRecivedError
+from common.errors import IncorrectDataRecivedError
 from proj_decorators import func_to_log
 
 

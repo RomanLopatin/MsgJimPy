@@ -1,3 +1,5 @@
+import os
+
 from sqlalchemy import create_engine, Table, Column, Integer, String, Text, MetaData, DateTime
 from sqlalchemy.orm import mapper, sessionmaker
 # from common.variables import *
@@ -33,11 +35,12 @@ class ClientDatabase:
         # каждый должен иметь свою БД.
         # Поскольку клиент мультипоточный, то необходимо отключить проверки на подключения
         # с разных потоков, иначе sqlite3.ProgrammingError
-        self.database_engine = create_engine(f'sqlite:///client_{name}.db3',
+        path = os.getcwd()
+        filename = f'client_{name}.db3'
+        self.database_engine = create_engine(f'sqlite:///{os.path.join(path, filename)}',
                                              echo=False,
                                              pool_recycle=7200,
                                              connect_args={'check_same_thread': False})
-
         # Создаём объект MetaData
         self.metadata = MetaData()
 
@@ -130,12 +133,9 @@ class ClientDatabase:
         return True if self.session.query(self.Contacts).filter_by(name=contact).count() else False
 
     # Функция возвращает историю переписки
-    def get_history(self, from_who=None, to_who=None):
-        query = self.session.query(self.MessageHistory)
-        if from_who:
-            query = query.filter_by(from_user=from_who)
-        if to_who:
-            query = query.filter_by(to_user=to_who)
+    def get_history(self, from_who=None):
+        query = self.session.query(self.MessageHistory).filter_by(from_user=from_who)
+
         return [(history_row.from_user, history_row.to_user, history_row.message, history_row.date)
                 for history_row in query.all()]
 
