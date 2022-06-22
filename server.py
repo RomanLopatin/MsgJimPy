@@ -255,33 +255,6 @@ def main():
     server.daemon = True
     server.start()
 
-    # print_help()
-    #
-    # # Основной цикл сервера:
-    # while True:
-    #     command = input('Введите команду: ')
-    #     if command == 'help':
-    #         print_help()
-    #     elif command == 'exit':
-    #         break
-    #     elif command == 'users':
-    #         for user in sorted(database.users_list()):
-    #             print(f'Пользователь {user[0]}, последний вход: {user[1]}')
-    #     elif command == 'connected':
-    #         active_users = database.active_users_list()
-    #         if active_users:
-    #             for user in sorted(active_users):
-    #                 print(f'Пользователь {user[0]}, подключен: {user[1]}:{user[2]}, время установки соединения: {user[3]}')
-    #         else:
-    #             print('Активные пользователи отсутствуют.')
-    #     elif command == 'loghist':
-    #         name = input('Введите имя пользователя для просмотра истории.\n '
-    #                      'Для вывода всей истории, просто нажмите Enter: ')
-    #         for user in sorted(database.login_history(name)):
-    #             print(f'Пользователь: {user[0]} время входа: {user[1]}. Вход с: {user[2]}:{user[3]}')
-    #     else:
-    #         print('Команда не распознана.')
-
     server_app = QApplication(sys.argv)
     main_window = MainWindow()
 

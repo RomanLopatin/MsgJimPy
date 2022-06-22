@@ -156,7 +156,6 @@ if __name__ == '__main__':
     print(test_db.check_user('test1'))
     print(test_db.check_user('test10'))
     print(test_db.get_history('test2'))
-    print(test_db.get_history(to_who='test2'))
     print(test_db.get_history('test3'))
     test_db.del_contact('test4')
     print(test_db.get_contacts())
