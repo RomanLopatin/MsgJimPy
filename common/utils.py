@@ -1,6 +1,6 @@
 import json
-import socket
 from common.variables import MAX_PACKAGE_LENGTH, ENCODING
+from common.errors import IncorrectDataRecivedError
 from proj_decorators import func_to_log
 
 
@@ -8,15 +8,14 @@ from proj_decorators import func_to_log
 def get_message(sock):
     encoded_msg = sock.recv(MAX_PACKAGE_LENGTH)
     if isinstance(encoded_msg, bytes):
-        json_msg = encoded_msg.decode(ENCODING)
-        if isinstance(json_msg, str):
-            dict_msg = json.loads(json_msg)
-            if isinstance(dict_msg, dict):
-                return dict_msg
-            raise ValueError
-        raise ValueError
-    raise ValueError
-
+        json_response = encoded_msg.decode(ENCODING)
+        response = json.loads(json_response)
+        if isinstance(response, dict):
+            return response
+        else:
+            raise IncorrectDataRecivedError
+    else:
+        raise IncorrectDataRecivedError
 
 @func_to_log
 def send_message(sock, message):
