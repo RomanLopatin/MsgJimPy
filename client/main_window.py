@@ -5,9 +5,9 @@ import sys
 import logging
 
 sys.path.append('../')
-from client.main_window_conv import Ui_MainClientWindow
-from client.add_contact import AddContactDialog
-from client.del_contact import DelContactDialog
+from main_window_conv import Ui_MainClientWindow
+from add_contact import AddContactDialog
+from del_contact import DelContactDialog
 from common.errors import ServerError
 
 logger = logging.getLogger('client_dist')
@@ -258,7 +258,7 @@ class ClientMainWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    from client.client_db import ClientDatabase
+    from client_db import ClientDatabase
     database = ClientDatabase('test1')
     from transport import ClientTransport
     transport = ClientTransport(7777, '127.0.0.1', database, 'test1')
