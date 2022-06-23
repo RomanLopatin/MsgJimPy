@@ -6,18 +6,13 @@ import socket
 import sys
 import time
 
-from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QApplication
 
 from client.client_db import ClientDatabase
 from client.main_window import ClientMainWindow
 from client.transport import ClientTransport
-from common.variables import ACTION, PRESENCE, TIME, USER, ACCOUNT_NAME, RESPONSE, ERROR, DEFAULT_PORT, \
-    DEFAULT_IP_ADDRESS, MESSAGE, MESSAGE_TEXT, SENDER, MESSAGE_RECEIVER, EXIT, USERS_REQUEST, LIST_INFO, REMOVE_CONTACT, \
-    ADD_CONTACT, GET_CONTACTS
-from common.utils import get_message, send_message
+from common.variables import  DEFAULT_PORT, DEFAULT_IP_ADDRESS
 from common.errors import ReqFieldMissingError, IncorrectDataRecivedError, ServerError
-from metaclasses import ClientVerifier
 from proj_decorators import func_to_log
 
 CLIENT_LOG = logging.getLogger('app.client')
