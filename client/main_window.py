@@ -1,10 +1,14 @@
+import os
+
 from PyQt5.QtWidgets import QMainWindow, qApp, QMessageBox, QApplication
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush, QColor
 from PyQt5.QtCore import pyqtSlot, Qt
 import sys
 import logging
 
-sys.path.append('../')
+# sys.path.append('../')
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+
 from main_window_conv import Ui_MainClientWindow
 from add_contact import AddContactDialog
 from del_contact import DelContactDialog
@@ -236,10 +240,10 @@ class ClientMainWindow(QMainWindow):
                 print('NO')
                 # Раз нет, спрашиваем хотим ли добавить юзера в контакты.
                 if self.messages.question(self, 'Новое сообщение',
-                              f'Получено новое сообщение от {sender}.\n '
-                              f'Данного пользователя нет в вашем контакт-листе.\n'
-                              f' Добавить в контакты и открыть чат с ним?',
-                              QMessageBox.Yes, QMessageBox.No) == QMessageBox.Yes:
+                                          f'Получено новое сообщение от {sender}.\n '
+                                          f'Данного пользователя нет в вашем контакт-листе.\n'
+                                          f' Добавить в контакты и открыть чат с ним?',
+                                          QMessageBox.Yes, QMessageBox.No) == QMessageBox.Yes:
                     self.add_contact(sender)
                     self.current_chat = sender
                     self.set_active_user()
@@ -252,15 +256,17 @@ class ClientMainWindow(QMainWindow):
         self.close()
 
     def make_connection(self, trans_obj):
-        trans_obj.new_message.connect(self.message)
-        trans_obj.connection_lost.connect(self.connection_lost)
+        trans_obj.new_message_sig.connect(self.message)
+        trans_obj.connection_lost_sig.connect(self.connection_lost)
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     from client_db import ClientDatabase
+
     database = ClientDatabase('test1')
     from transport import ClientTransport
+
     transport = ClientTransport(7777, '127.0.0.1', database, 'test1')
     window = ClientMainWindow(database, transport)
     sys.exit(app.exec_())
