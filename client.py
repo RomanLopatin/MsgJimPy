@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QApplication
 
 from client.client_db import ClientDatabase
 from client.main_window import ClientMainWindow
+from client.start_dialog import UserNameDialog
 from client.transport import ClientTransport
 from common.variables import  DEFAULT_PORT, DEFAULT_IP_ADDRESS
 from common.errors import ReqFieldMissingError, IncorrectDataRecivedError, ServerError
@@ -27,10 +28,7 @@ def client_arg_parser():
     try:
         client_name = sys.argv[sys.argv.index('-n') + 1]
     except (IndexError, ValueError):
-        client_name = input("Введите имя клиента: ")
-    if not client_name:
-        CLIENT_LOG.critical('Не задано имя клиента!')
-        sys.exit(1)
+        pass
 
     try:
         server_address = sys.argv[1]
@@ -55,6 +53,18 @@ def main():
 
     # Создаём клиентокое приложение
     client_app = QApplication(sys.argv)
+
+    # Если имя пользователя не было указано в командной строке, то запросим его
+    if not client_name:
+        start_dialog = UserNameDialog()
+        client_app.exec_()
+        # Если пользователь ввёл имя и нажал ОК, то сохраняем ведённое и удаляем объект.
+        # Иначе - выходим
+        if start_dialog.ok_pressed:
+            client_name = start_dialog.client_name.text()
+            del start_dialog
+        else:
+            exit(0)
 
     # Инициализация БД
     database = ClientDatabase(client_name)
