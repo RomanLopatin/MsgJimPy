@@ -5,8 +5,8 @@ from select import select
 import socket
 
 from common.utils import get_message, send_message
-from descriptors import PortDescriptor
-from metaclasses import ServerVerifier
+from common.descriptors import PortDescriptor
+from common.metaclasses import ServerVerifier
 from common.variables import RESPONSE_202, LIST_INFO, GET_CONTACTS, ADD_CONTACT, RESPONSE_200, \
     RESPONSE_400, REMOVE_CONTACT, USERS_REQUEST, ACTION, PRESENCE, USER, ACCOUNT_NAME, ERROR, \
     MAX_CONNECTIONS, TIME, MESSAGE_TEXT, MESSAGE, SENDER, MESSAGE_RECEIVER, EXIT

@@ -1,7 +1,7 @@
 import json
 from common.variables import MAX_PACKAGE_LENGTH, ENCODING
 from common.errors import IncorrectDataRecivedError
-from proj_decorators import func_to_log
+from common.proj_decorators import func_to_log
 
 
 @func_to_log

@@ -1,10 +1,7 @@
-import json
 import logging
 import threading
 
-import socket
 import sys
-import time
 
 from PyQt5.QtWidgets import QApplication
 
@@ -13,8 +10,8 @@ from client.main_window import ClientMainWindow
 from client.start_dialog import UserNameDialog
 from client.transport import ClientTransport
 from common.variables import  DEFAULT_PORT, DEFAULT_IP_ADDRESS
-from common.errors import ReqFieldMissingError, IncorrectDataRecivedError, ServerError
-from proj_decorators import func_to_log
+from common.errors import ServerError
+from common.proj_decorators import func_to_log
 
 CLIENT_LOG = logging.getLogger('app.client')
 
