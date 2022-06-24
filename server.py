@@ -11,7 +11,8 @@ from common.proj_decorators import func_to_log
 from server.server_db import ServerStorage
 from server.core import Server
 from common.variables import DEFAULT_PORT
-from server.server_gui import MainWindow, gui_create_model, HistoryWindow, ConfigWindow, create_stat_model
+from server.main_window import MainWindow
+
 
 SERVER_LOG = logging.getLogger('app.server')
 
@@ -75,7 +76,7 @@ def main():
     server.start()
 
     server_app = QApplication(sys.argv)
-    main_window = MainWindow()
+    main_window = MainWindow(database, server, config)
 
     # Запускаем GUI
     server_app.exec_()
