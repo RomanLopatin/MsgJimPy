@@ -8,7 +8,7 @@ import select
 import socket
 import logging
 import server.logs.server_log_config
-from common.proj_decorators import func_to_log
+from common.proj_decorators import func_to_log, login_required
 
 sys.path.append('../')
 
@@ -153,7 +153,7 @@ class Server(threading.Thread):
             SERVER_LOG.error(
                 f'Пользователь {message[MESSAGE_RECEIVER]} не зарегистрирован на сервере, отправка сообщения невозможна.')
 
-    # @login_required
+    @login_required
     @func_to_log
     def process_client_message(self, message, client):
         """ Метод обработчик поступающих сообщений. """
