@@ -2,9 +2,14 @@ from sqlalchemy import create_engine, Table, Column, Integer, String, Text, Meta
 from sqlalchemy.orm import mapper, sessionmaker
 import os
 import sys
+
 sys.path.append('..')
 from common.variables import *
 import datetime
+import logging
+import client.logs.client_log_config
+
+CLIENT_LOG = logging.getLogger('app.client')
 
 
 # Класс - база данных сервера.
@@ -91,6 +96,11 @@ class ClientDatabase:
             self.session.add(contact_row)
             self.session.commit()
 
+    def contacts_clear(self):
+        """ Метод, очищающий таблицу со списком контактов. """
+        self.session.query(self.Contacts).delete()
+        self.session.commit()
+
     # Функция удаления контакта
     def del_contact(self, contact):
         self.session.query(self.Contacts).filter_by(name=contact).delete()
@@ -145,7 +155,7 @@ class ClientDatabase:
 if __name__ == '__main__':
     test_db = ClientDatabase('test1')
     for i in ['test3', 'test4', 'test5']:
-       test_db.add_contact(i)
+        test_db.add_contact(i)
     test_db.add_contact('test4')
     test_db.add_users(['test1', 'test2', 'test3', 'test4', 'test5'])
     test_db.save_message('test2', 'in',
@@ -156,6 +166,6 @@ if __name__ == '__main__':
     print(test_db.get_users())
     print(test_db.check_user('test1'))
     print(test_db.check_user('test10'))
-    print(sorted(test_db.get_history('test2') , key=lambda item: item[3]))
+    print(sorted(test_db.get_history('test2'), key=lambda item: item[3]))
     test_db.del_contact('test4')
     print(test_db.get_contacts())

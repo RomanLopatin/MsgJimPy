@@ -1,6 +1,9 @@
 from PyQt5.QtWidgets import QDialog, QLabel, QComboBox, QPushButton, QApplication
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
+import logging
+import server.logs.server_log_config
+SERVER_LOG = logging.getLogger('app.server')
 
 
 class DelUserDialog(QDialog):

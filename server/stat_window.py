@@ -1,6 +1,9 @@
 from PyQt5.QtWidgets import QDialog, QPushButton, QTableView
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import Qt
+import logging
+import server.logs.server_log_config
+SERVER_LOG = logging.getLogger('app.server')
 
 
 class StatWindow(QDialog):

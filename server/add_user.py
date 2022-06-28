@@ -2,6 +2,11 @@ from PyQt5.QtWidgets import QDialog, QPushButton, QLineEdit, QApplication, QLabe
 from PyQt5.QtCore import Qt
 import hashlib
 import binascii
+import logging
+import server.logs.server_log_config
+SERVER_LOG = logging.getLogger('app.server')
+
+from server.server_db import ServerStorage
 
 
 class RegisterUser(QDialog):
@@ -90,8 +95,8 @@ class RegisterUser(QDialog):
 
 if __name__ == '__main__':
     app = QApplication([])
-    from database import ServerStorage
-    database = ServerStorage('../server_database.db3')
+    database = ServerStorage('server_database.db3')
+    # from database import ServerStorage
     import os
     import sys
     path1 = os.path.join(os.getcwd(), '..')

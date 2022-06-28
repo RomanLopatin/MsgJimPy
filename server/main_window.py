@@ -1,3 +1,4 @@
+import sys
 
 from PyQt5.QtWidgets import QMainWindow, QAction, qApp, QApplication, QLabel, QTableView
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
@@ -6,6 +7,11 @@ from server.stat_window import StatWindow
 from server.config_window import ConfigWindow
 from server.add_user import RegisterUser
 from server.remove_user import DelUserDialog
+
+import logging
+sys.path.append('../')
+import server.logs.server_log_config
+SERVER_LOG = logging.getLogger('app.server')
 
 
 class MainWindow(QMainWindow):

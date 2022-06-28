@@ -5,8 +5,11 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush, QColor
 from PyQt5.QtCore import pyqtSlot, Qt
 import sys
 import logging
+import client.logs.client_log_config
 
 # sys.path.append('../')
+from common.variables import SENDER, MESSAGE, MESSAGE_TEXT
+
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from main_window_conv import Ui_MainClientWindow
@@ -14,7 +17,8 @@ from add_contact import AddContactDialog
 from del_contact import DelContactDialog
 from common.errors import ServerError
 
-logger = logging.getLogger('client_dist')
+
+CLIENT_LOG = logging.getLogger('app.client')
 
 
 # Класс основного окна
@@ -164,7 +168,7 @@ class ClientMainWindow(QMainWindow):
             new_contact = QStandardItem(new_contact)
             new_contact.setEditable(False)
             self.contacts_model.appendRow(new_contact)
-            logger.info(f'Успешно добавлен контакт {new_contact}')
+            CLIENT_LOG.info(f'Успешно добавлен контакт {new_contact}')
             self.messages.information(self, 'Успех', 'Контакт успешно добавлен.')
 
     # Функция удаления контакта
@@ -189,7 +193,7 @@ class ClientMainWindow(QMainWindow):
         else:
             self.database.del_contact(selected)
             self.clients_list_update()
-            logger.info(f'Успешно удалён контакт {selected}')
+            CLIENT_LOG.info(f'Успешно удалён контакт {selected}')
             self.messages.information(self, 'Успех', 'Контакт успешно удалён.')
             item.close()
             # Если удалён активный пользователь, то деактивируем поля ввода.
@@ -218,13 +222,20 @@ class ClientMainWindow(QMainWindow):
             self.close()
         else:
             self.database.save_message(self.current_chat, 'out', message_text)
-            logger.debug(f'Отправлено сообщение для {self.current_chat}: {message_text}')
+            CLIENT_LOG.debug(f'Отправлено сообщение для {self.current_chat}: {message_text}')
             self.history_list_update()
 
     # Слот приёма нового сообщений
-    @pyqtSlot(str)
-    def message(self, sender):
+    # @pyqtSlot(str)
+    def message(self, message):
+
+        sender = message[SENDER]
+
         if sender == self.current_chat:
+            self.database.save_message(
+                self.current_chat,
+                'in',
+                message[MESSAGE_TEXT])
             self.history_list_update()
         else:
             # Проверим есть ли такой пользователь у нас в контактах:
@@ -235,6 +246,8 @@ class ClientMainWindow(QMainWindow):
                                           f'открыть чат с ним?', QMessageBox.Yes,
                                           QMessageBox.No) == QMessageBox.Yes:
                     self.current_chat = sender
+                    self.database.save_message(
+                        self.current_chat, 'in', message[MESSAGE_TEXT])
                     self.set_active_user()
             else:
                 print('NO')
@@ -246,18 +259,37 @@ class ClientMainWindow(QMainWindow):
                                           QMessageBox.Yes, QMessageBox.No) == QMessageBox.Yes:
                     self.add_contact(sender)
                     self.current_chat = sender
+                    self.database.save_message(
+                        self.current_chat, 'in', message[MESSAGE_TEXT])
+                    self.set_active_user()
                     self.set_active_user()
 
     # Слот потери соединения
     # Выдаёт сообщение об ошибке и завершает работу приложения
-    @pyqtSlot()
+    # @pyqtSlot()
     def connection_lost(self):
         self.messages.warning(self, 'Сбой соединения', 'Потеряно соединение с сервером. ')
         self.close()
 
+    # @pyqtSlot()
+    def sig_205(self):
+        '''
+        Слот выполняющий обновление баз данных по команде сервера.
+        '''
+        if self.current_chat and not self.database.check_user(
+                self.current_chat):
+            self.messages.warning(
+                self,
+                'Сочувствую',
+                'К сожалению собеседник был удалён с сервера.')
+            self.set_disabled_input()
+            self.current_chat = None
+        self.clients_list_update()
+
     def make_connection(self, trans_obj):
         trans_obj.new_message_sig.connect(self.message)
         trans_obj.connection_lost_sig.connect(self.connection_lost)
+        trans_obj.message_205_sig.connect(self.sig_205)
 
 
 if __name__ == '__main__':
