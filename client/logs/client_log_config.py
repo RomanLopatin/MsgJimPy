@@ -3,10 +3,9 @@
 """
 
 import logging
-
-# Создаём объект-логгер с именем app.client
 import os
 
+# Создаём объект-логгер с именем app.client
 CLIENT_LOG = logging.getLogger('app.client')
 
 # Создаём объект форматирования:
@@ -16,6 +15,7 @@ CLIENT_FORMATTER = logging.Formatter("%(asctime)s %(levelname)s %(filename)s %(m
 PATH = os.path.dirname(os.path.abspath(__file__))
 PATH = os.path.join(PATH, 'app.client.log')
 FILE_HANDLER = logging.FileHandler(PATH, encoding='utf-8')
+
 # Задаем форматтер для обработчика
 FILE_HANDLER.setFormatter(CLIENT_FORMATTER)
 
