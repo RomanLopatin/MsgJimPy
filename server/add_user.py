@@ -1,22 +1,24 @@
-from PyQt5.QtWidgets import QDialog, QPushButton, QLineEdit, QApplication, QLabel, QMessageBox
-from PyQt5.QtCore import Qt
 import hashlib
 import binascii
 import logging
-import server.logs.server_log_config
-SERVER_LOG = logging.getLogger('app.server')
+
+from PyQt5.QtWidgets import QDialog, QPushButton, QLineEdit, QApplication, QLabel, QMessageBox
+from PyQt5.QtCore import Qt
 
 from server.server_db import ServerStorage
+import server.logs.server_log_config
+
+SERVER_LOG = logging.getLogger('app.server')
 
 
 class RegisterUser(QDialog):
     """ Класс диалог регистрации пользователя на сервере. """
 
-    def __init__(self, database, server):
+    def __init__(self, database_, server_):
         super().__init__()
 
-        self.database = database
-        self.server = server
+        self.database = database_
+        self.server = server_
 
         self.setWindowTitle('Регистрация')
         self.setFixedSize(175, 183)
@@ -61,9 +63,8 @@ class RegisterUser(QDialog):
         self.show()
 
     def save_data(self):
-        """
-        Метод проверки правильности ввода и сохранения в базу нового пользователя.
-        """
+        """Метод проверки правильности ввода и сохранения в базу нового пользователя"""
+
         if not self.client_name.text():
             self.messages.critical(
                 self, 'Ошибка', 'Не указано имя пользователя.')
@@ -96,12 +97,11 @@ class RegisterUser(QDialog):
 if __name__ == '__main__':
     app = QApplication([])
     database = ServerStorage('server_database.db3')
-    # from database import ServerStorage
     import os
     import sys
     path1 = os.path.join(os.getcwd(), '..')
     sys.path.insert(0, path1)
-    from core import MessageProcessor
-    server = MessageProcessor('127.0.0.1', 7777, database)
+    from core import Server
+    server = Server('127.0.0.1', 7777, database)
     dial = RegisterUser(database, server)
     app.exec_()

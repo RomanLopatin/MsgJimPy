@@ -1,7 +1,6 @@
 import argparse
 import logging
 import threading
-
 import sys
 
 from PyQt5.QtWidgets import QApplication
@@ -14,7 +13,6 @@ from common.variables import DEFAULT_PORT, DEFAULT_IP_ADDRESS
 from common.errors import ServerError
 from common.proj_decorators import func_to_log
 
-import logging
 import client.logs.client_log_config
 
 CLIENT_LOG = logging.getLogger('app.client')
@@ -23,37 +21,9 @@ sock_lock = threading.Lock()
 database_lock = threading.Lock()
 
 
-# @func_to_log
-# def client_arg_parser():
-#     client_name = ''
-#     client_passwd = ''
-#     try:
-#         client_name = sys.argv[sys.argv.index('-n') + 1]
-#     except (IndexError, ValueError):
-#         pass
-#
-#     try:
-#         server_address = sys.argv[1]
-#         server_port = int(sys.argv[2])
-#         if server_port < 1024 or server_port > 65535:
-#             CLIENT_LOG.critical(
-#                 f'Попытка запуска клиента с неверным портом ({server_port}). '
-#                 f'Требуется диапазон от 1024 до 65535!')
-#     except IndexError:
-#         CLIENT_LOG.error("Index error. Не удалось получить значение порта/сервера по индексу."
-#                          "Будут использованы значения по умолчанию.")
-#         server_address = DEFAULT_IP_ADDRESS
-#         server_port = DEFAULT_PORT
-#     CLIENT_LOG.info(f'Запущен клиент с парамертами: '
-#                     f'адрес сервера: {server_address}, порт: {server_port}')
-
-#   return client_name, server_address, server_port, client_passwd
-
-
 @func_to_log
 def client_arg_parser():
-    """
-    Парсер аргументов командной строки, возвращает кортеж из 4 элементов
+    """Парсер аргументов командной строки, возвращает кортеж из 4 элементов
     адрес сервера, порт, имя пользователя, пароль.
     Выполняет проверку на корректность номера порта.
     """
@@ -79,6 +49,8 @@ def client_arg_parser():
 
 
 def main():
+    """Основная функция клиента"""
+
     client_name, server_address, server_port, client_passwd = client_arg_parser()
 
     # Создаём клиентокое приложение

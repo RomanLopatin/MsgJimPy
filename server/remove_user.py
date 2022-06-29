@@ -1,20 +1,21 @@
+import logging
+
 from PyQt5.QtWidgets import QDialog, QLabel, QComboBox, QPushButton, QApplication
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
-import logging
+
+from server.server_db import ServerStorage
 import server.logs.server_log_config
+
 SERVER_LOG = logging.getLogger('app.server')
 
 
 class DelUserDialog(QDialog):
-    '''
-    Класс - диалог выбора контакта для удаления.
-    '''
+    """Класс - диалог выбора контакта для удаления."""
 
-    def __init__(self, database, server):
+    def __init__(self, database_, server_):
         super().__init__()
-        self.database = database
-        self.server = server
+        self.database = database_
+        self.server = server_
 
         self.setFixedSize(350, 120)
         self.setWindowTitle('Удаление пользователя')
@@ -43,12 +44,12 @@ class DelUserDialog(QDialog):
         self.all_users_fill()
 
     def all_users_fill(self):
-        '''Метод заполняющий список пользователей.'''
+        """Метод заполняющий список пользователей."""
         self.selector.addItems([item[0]
                                 for item in self.database.users_list()])
 
     def remove_user(self):
-        '''Метод - обработчик удаления пользователя.'''
+        """Метод - обработчик удаления пользователя."""
         self.database.remove_user(self.selector.currentText())
         if self.selector.currentText() in self.server.names:
             sock = self.server.names[self.selector.currentText()]
@@ -61,14 +62,13 @@ class DelUserDialog(QDialog):
 
 if __name__ == '__main__':
     app = QApplication([])
-    from database import ServerStorage
-    database = ServerStorage('../server_database.db3')
+    database = ServerStorage('server_database.db3')
     import os
     import sys
     path1 = os.path.join(os.getcwd(), '..')
     sys.path.insert(0, path1)
-    from core import MessageProcessor
-    server = MessageProcessor('127.0.0.1', 7777, database)
+    from core import Server
+    server = Server('127.0.0.1', 7777, database)
     dial = DelUserDialog(database, server)
     dial.show()
     app.exec_()

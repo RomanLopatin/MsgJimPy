@@ -4,7 +4,7 @@ from common.errors import IncorrectDataRecivedError
 from common.proj_decorators import func_to_log
 
 
-# @func_to_log
+@func_to_log
 def get_message(sock):
     encoded_msg = sock.recv(MAX_PACKAGE_LENGTH)
     if isinstance(encoded_msg, bytes):
@@ -16,6 +16,7 @@ def get_message(sock):
             raise IncorrectDataRecivedError
     else:
         raise IncorrectDataRecivedError
+
 
 @func_to_log
 def send_message(sock, message):

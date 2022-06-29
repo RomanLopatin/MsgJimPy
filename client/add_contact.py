@@ -1,20 +1,26 @@
 import sys
 import logging
+
+from PyQt5.QtWidgets import QDialog, QLabel, QComboBox, QPushButton, QApplication
+from PyQt5.QtCore import Qt
+
 import client.logs.client_log_config
 
 sys.path.append('../')
-from PyQt5.QtWidgets import QDialog, QLabel, QComboBox, QPushButton, QApplication
-from PyQt5.QtCore import Qt
 
 CLIENT_LOG = logging.getLogger('app.client')
 
 
-# Диалог выбора контакта для добавления
 class AddContactDialog(QDialog):
-    def __init__(self, transport, database):
+    """ Диалог добавления пользователя в список контактов.
+    Предлагает пользователю список возможных контактов и
+    добавляет выбранный в контакты.
+    """
+
+    def __init__(self, transport_, database_):
         super().__init__()
-        self.transport = transport
-        self.database = database
+        self.transport = transport_
+        self.database = database_
 
         self.setFixedSize(350, 120)
         self.setWindowTitle('Выберите контакт для добавления:')
@@ -49,8 +55,11 @@ class AddContactDialog(QDialog):
         # Назначаем действие на кнопку обновить
         self.btn_refresh.clicked.connect(self.update_possible_contacts)
 
-    # Заполняем список возможных контактов разницей между всеми пользователями и
     def possible_contacts_update(self):
+        """Метод заполнения списка возможных контактов.
+        Создаёт список всех зарегистрированных пользователей
+        за исключением уже добавленных в контакты и самого себя.
+        """
         self.selector.clear()
         # множества всех контактов и контактов клиента
         contacts_list = set(self.database.get_contacts())
@@ -68,16 +77,18 @@ class AddContactDialog(QDialog):
         except OSError:
             pass
         else:
-            logger.debug('Обновление списка пользователей с сервера выполнено')
+            CLIENT_LOG.debug('Обновление списка пользователей с сервера выполнено')
             self.possible_contacts_update()
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     from client.client_db import ClientDatabase
-    database = ClientDatabase('test1')
+
+    database = ClientDatabase('client_test_1')
     from transport import ClientTransport
-    transport = ClientTransport(7777, '127.0.0.1', database, 'test1')
+
+    transport = ClientTransport(8888, '127.0.0.1', database, 'test_1', "1")
     window = AddContactDialog(transport, database)
     window.show()
     app.exec_()
