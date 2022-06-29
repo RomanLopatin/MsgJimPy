@@ -1,21 +1,24 @@
 import sys
+import logging
 
 from PyQt5.QtWidgets import QMainWindow, QAction, qApp, QApplication, QLabel, QTableView
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import QTimer
+
 from server.stat_window import StatWindow
 from server.config_window import ConfigWindow
 from server.add_user import RegisterUser
 from server.remove_user import DelUserDialog
-
-import logging
-sys.path.append('../')
 import server.logs.server_log_config
+
+
+sys.path.append('../')
+
 SERVER_LOG = logging.getLogger('app.server')
 
 
 class MainWindow(QMainWindow):
-    '''Класс - основное окно сервера.'''
+    """Класс - основное окно сервера"""
 
     def __init__(self, database, server, config):
         # Конструктор предка
@@ -92,10 +95,10 @@ class MainWindow(QMainWindow):
         self.show()
 
     def create_users_model(self):
-        '''Метод заполняющий таблицу активных пользователей.'''
+        """Метод заполняющий таблицу активных пользователей."""
         list_users = self.database.active_users_list()
-        list = QStandardItemModel()
-        list.setHorizontalHeaderLabels(
+        list_ = QStandardItemModel()
+        list_.setHorizontalHeaderLabels(
             ['Имя Клиента', 'IP Адрес', 'Порт', 'Время подключения'])
         for row in list_users:
             user, ip, port, time = row
@@ -109,31 +112,31 @@ class MainWindow(QMainWindow):
             # требуется.
             time = QStandardItem(str(time.replace(microsecond=0)))
             time.setEditable(False)
-            list.appendRow([user, ip, port, time])
-        self.active_clients_table.setModel(list)
+            list_.appendRow([user, ip, port, time])
+        self.active_clients_table.setModel(list_)
         self.active_clients_table.resizeColumnsToContents()
         self.active_clients_table.resizeRowsToContents()
 
     def show_statistics(self):
-        '''Метод создающий окно со статистикой клиентов.'''
+        """Метод создающий окно со статистикой клиентов."""
         global stat_window
         stat_window = StatWindow(self.database)
         stat_window.show()
 
     def server_config(self):
-        '''Метод создающий окно с настройками сервера.'''
+        """Метод создающий окно с настройками сервера."""
         global config_window
         # Создаём окно и заносим в него текущие параметры
         config_window = ConfigWindow(self.config)
 
     def reg_user(self):
-        '''Метод создающий окно регистрации пользователя.'''
+        """Метод создающий окно регистрации пользователя."""
         global reg_window
         reg_window = RegisterUser(self.database, self.server_thread)
         reg_window.show()
 
     def rem_user(self):
-        '''Метод создающий окно удаления пользователя.'''
+        """Метод создающий окно удаления пользователя."""
         global rem_window
         rem_window = DelUserDialog(self.database, self.server_thread)
         rem_window.show()

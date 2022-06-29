@@ -1,10 +1,8 @@
 import dis
-from pprint import pprint
 
 
 class ServerVerifier(type):
-    """
-    метакласс ServerVerifier, выполняет базовую проверку класса «Server»:
+    """Метакласс ServerVerifier, выполняет базовую проверку класса «Server»:
     отсутствие вызовов connect для сокетов;
     использование сокетов для работы по TCP.
     """
@@ -52,8 +50,7 @@ class ServerVerifier(type):
 
 # Метакласс для проверки корректности клиентов:
 class ClientVerifier(type):
-    """
-    метакласс ClientVerifier, выполняет базовую проверку класса «Clien»
+    """Метакласс ClientVerifier, выполняет базовую проверку класса «Client»
     (для некоторых проверок уместно использовать модуль dis):
     отсутствие вызовов accept и listen для сокетов;
     использование сокетов для работы по TCP;

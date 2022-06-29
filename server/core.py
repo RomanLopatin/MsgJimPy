@@ -7,20 +7,17 @@ import threading
 import select
 import socket
 import logging
-import server.logs.server_log_config
+
 from common.proj_decorators import func_to_log, login_required
-
-sys.path.append('../')
-
-SERVER_LOG = logging.getLogger('app.server')
-
 from common.utils import get_message, send_message
 from common.descriptors import PortDescriptor
-from common.metaclasses import ServerVerifier
-from common.variables import RESPONSE_202, LIST_INFO, GET_CONTACTS, ADD_CONTACT, RESPONSE_200, \
-    RESPONSE_400, REMOVE_CONTACT, USERS_REQUEST, ACTION, PRESENCE, USER, ACCOUNT_NAME, ERROR, \
-    MAX_CONNECTIONS, TIME, MESSAGE_TEXT, MESSAGE, SENDER, MESSAGE_RECEIVER, EXIT, RESPONSE, PUBLIC_KEY, DATA, \
-    RESPONSE_511, RESPONSE_205
+from common.variables import RESPONSE_202, LIST_INFO, GET_CONTACTS, ADD_CONTACT, RESPONSE_200, RESPONSE_400, \
+    REMOVE_CONTACT, USERS_REQUEST, ACTION, PRESENCE, USER, ACCOUNT_NAME, ERROR, MAX_CONNECTIONS, TIME, MESSAGE_TEXT, \
+    MESSAGE, SENDER, MESSAGE_RECEIVER, EXIT, RESPONSE, DATA, RESPONSE_511, RESPONSE_205
+import server.logs.server_log_config
+
+
+SERVER_LOG = logging.getLogger('app.server')
 
 sys.path.append('../')
 
@@ -29,8 +26,7 @@ conflag_lock = threading.Lock()
 
 
 class Server(threading.Thread):
-    """
-    Основной класс сервера. Принимает содинения, словари - пакеты
+    """Основной класс сервера. Принимает содинения, словари - пакеты
     от клиентов, обрабатывает поступающие сообщения.
     Работает в качестве отдельного потока.
     """
@@ -65,8 +61,7 @@ class Server(threading.Thread):
         super().__init__()
 
     def run(self):
-        '''Метод основной цикл потока.'''
-        # Инициализация Сокета
+        """Метод основной цикл потока."""
         self.init_socket()
 
         # Основной цикл программы сервера
@@ -104,10 +99,9 @@ class Server(threading.Thread):
 
     @func_to_log
     def remove_client(self, client):
-        '''
-        Метод обработчик клиента с которым прервана связь.
-        Ищет клиента и удаляет его из списков и базы:
-        '''
+        """Метод обработчик клиента с которым прервана связь.
+        Ищет клиента и удаляет его из списков и базы:"""
+
         SERVER_LOG.info(f'Клиент {client.getpeername()} отключился от сервера.')
         for name in self.names:
             if self.names[name] == client:
@@ -118,7 +112,8 @@ class Server(threading.Thread):
         client.close()
 
     def init_socket(self):
-        '''Метод инициализатор сокета.'''
+        """Метод инициализатор сокета."""
+
         SERVER_LOG.info(
             f'Запущен сервер, порт для подключений: {self.port} , адрес с которого принимаются подключения: {self.addr}. Если адрес не указан, принимаются соединения с любых адресов.')
         # Готовим сокет
@@ -133,11 +128,10 @@ class Server(threading.Thread):
 
     @func_to_log
     def process_message(self, message):
-        '''
-        Метод отправки сообщения клиенту.
-        '''
-        if message[MESSAGE_RECEIVER] in self.names and self.names[message[MESSAGE_RECEIVER]
-        ] in self.listen_sockets:
+        """Метод отправки сообщения клиенту."""
+
+        if message[MESSAGE_RECEIVER] in self.names and self.names[message[MESSAGE_RECEIVER]] \
+                in self.listen_sockets:
             try:
                 send_message(self.names[message[MESSAGE_RECEIVER]], message)
                 SERVER_LOG.info(
@@ -265,8 +259,8 @@ class Server(threading.Thread):
             message_auth[DATA] = random_str.decode('ascii')
             # Создаём хэш пароля и связки с рандомной строкой, сохраняем
             # серверную версию ключа
-            hash = hmac.new(self.database.get_hash(message[USER][ACCOUNT_NAME]), random_str, 'MD5')
-            digest = hash.digest()
+            hash_ = hmac.new(self.database.get_hash(message[USER][ACCOUNT_NAME]), random_str, 'MD5')
+            digest = hash_.digest()
             SERVER_LOG.debug(f'Auth message = {message_auth}')
             try:
                 # Обмен с клиентом
@@ -305,7 +299,7 @@ class Server(threading.Thread):
 
     @func_to_log
     def service_update_lists(self):
-        '''Метод реализующий отправки сервисного сообщения 205 клиентам.'''
+        """Метод реализующий отправки сервисного сообщения 205 клиентам."""
         for client in self.names:
             try:
                 send_message(self.names[client], RESPONSE_205)
