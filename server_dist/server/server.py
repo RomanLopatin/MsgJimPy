@@ -5,7 +5,6 @@ import configparser
 import threading
 import logging
 
-import PyQt5
 from PyQt5.QtWidgets import QApplication, QMessageBox
 
 from common.proj_decorators import func_to_log
@@ -62,12 +61,6 @@ def main():
     server_ = Server(address_to_listen, port_to_listen, database)
     server_.daemon = True
     server_.start()
-
-    # Без добавления пути не находит плагин для запуска QApplication!
-    dir_name = os.path.dirname(PyQt5.__file__)
-    plugin_path = os.path.join(dir_name, 'Qt5', 'plugins', 'platforms')
-    os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
-    # **********************************************
 
     server_app = QApplication(sys.argv)
     main_window = MainWindow(database, server_, config)

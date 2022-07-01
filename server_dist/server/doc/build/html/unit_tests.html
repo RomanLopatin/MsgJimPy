@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>unit_tests package &#8212; MsgJimPy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="server module" href="server.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="unit-tests-package">
+<h1>unit_tests package<a class="headerlink" href="#unit-tests-package" title="Permalink to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="module-unit_tests.test_utils">
+<span id="unit-tests-test-utils-module"></span><h2>unit_tests.test_utils module<a class="headerlink" href="#module-unit_tests.test_utils" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestSocket">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">unit_tests.test_utils.</span></span><span class="sig-name descname"><span class="pre">TestSocket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#unit_tests.test_utils.TestSocket" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Тестовый класс для имитации сокета - для проверки корректности методов send() и receive(),
+при создании необходимо задать сообщение(словарь)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestSocket.recv">
+<span class="sig-name descname"><span class="pre">recv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_len</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#unit_tests.test_utils.TestSocket.recv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Получаем данные из сокета</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestSocket.send">
+<span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sent_message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#unit_tests.test_utils.TestSocket.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Тестовый метод отправки, он корректно кодирует сообщение (self.encoded_message),
+а так-же сохраняет результат  работы тестируемой функции send() (message_to_send -&gt;self.sent_message) .</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestSocket_resv_no_coding">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">unit_tests.test_utils.</span></span><span class="sig-name descname"><span class="pre">TestSocket_resv_no_coding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#unit_tests.test_utils.TestSocket_resv_no_coding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Тестовый класс для имитации сокета - для проверки корректности методов send() и receive(),
+при создании необходимо задать сообщение(словарь)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestSocket_resv_no_coding.recv">
+<span class="sig-name descname"><span class="pre">recv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_len</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#unit_tests.test_utils.TestSocket_resv_no_coding.recv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Получаем данные из сокета без кодирования!</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestUtils">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">unit_tests.test_utils.</span></span><span class="sig-name descname"><span class="pre">TestUtils</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#unit_tests.test_utils.TestUtils" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
+<p>класс юнит-тестов функций модуля утилит (common/utils)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestUtils.test_get_message_error">
+<span class="sig-name descname"><span class="pre">test_get_message_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#unit_tests.test_utils.TestUtils.test_get_message_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Тест функции приёма сообщения об ошибке</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestUtils.test_get_message_ok">
+<span class="sig-name descname"><span class="pre">test_get_message_ok</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#unit_tests.test_utils.TestUtils.test_get_message_ok" title="Permalink to this definition">¶</a></dt>
+<dd><p>Тест функции приёма сообщения о корректной доставке сообщения.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestUtils.test_get_message_value_error">
+<span class="sig-name descname"><span class="pre">test_get_message_value_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#unit_tests.test_utils.TestUtils.test_get_message_value_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Тест функции получения - обработка исключения неверного формата сообщения (не словарь).
+Создаем тестовый сокет и проверяем корректность обработки неверного формата сообщения (ValueError)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestUtils.test_get_message_value_error_no_coding">
+<span class="sig-name descname"><span class="pre">test_get_message_value_error_no_coding</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#unit_tests.test_utils.TestUtils.test_get_message_value_error_no_coding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Тест функции получения - обработка исключения неверного формата вх.сообщения (не byte).
+Создаем тестовый сокет (для теста ошиочнго формата) и проверяем корректность обработки неверного формата сообщения (ValueError)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestUtils.test_message_to_send">
+<span class="sig-name descname"><span class="pre">test_message_to_send</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'action':</span> <span class="pre">'presence',</span> <span class="pre">'time':</span> <span class="pre">20.0,</span> <span class="pre">'user':</span> <span class="pre">{'account_name':</span> <span class="pre">'user'}}</span></em><a class="headerlink" href="#unit_tests.test_utils.TestUtils.test_message_to_send" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestUtils.test_msg_receive_err">
+<span class="sig-name descname"><span class="pre">test_msg_receive_err</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'error':</span> <span class="pre">'Bad</span> <span class="pre">Request',</span> <span class="pre">'response':</span> <span class="pre">400}</span></em><a class="headerlink" href="#unit_tests.test_utils.TestUtils.test_msg_receive_err" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestUtils.test_msg_receive_non_dict">
+<span class="sig-name descname"><span class="pre">test_msg_receive_non_dict</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'non_dict_message'</span></em><a class="headerlink" href="#unit_tests.test_utils.TestUtils.test_msg_receive_non_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestUtils.test_msg_receive_ok">
+<span class="sig-name descname"><span class="pre">test_msg_receive_ok</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'response':</span> <span class="pre">200}</span></em><a class="headerlink" href="#unit_tests.test_utils.TestUtils.test_msg_receive_ok" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestUtils.test_send_message_error">
+<span class="sig-name descname"><span class="pre">test_send_message_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#unit_tests.test_utils.TestUtils.test_send_message_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Тест функции отправки - обработка исключения неверного формата сообщения.
+Создаем тестовый сокет и проверяем корректность обработки неверного формата сообщения (TypeError)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="unit_tests.test_utils.TestUtils.test_send_message_ok">
+<span class="sig-name descname"><span class="pre">test_send_message_ok</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#unit_tests.test_utils.TestUtils.test_send_message_ok" title="Permalink to this definition">¶</a></dt>
+<dd><p>Тест функции отправки сообщения.
+Создадим тестовый сокет и проверим корректность отправки сообщения</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-unit_tests">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-unit_tests" title="Permalink to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MsgJimPy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">MsgJimPy2</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="client.html">Client module documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.html">common package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="launcher.html">launcher module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="server.html">server module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">unit_tests package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">MsgJimPy2</a><ul>
+      <li>Previous: <a href="server.html" title="previous chapter">server module</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, ROL.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/unit_tests.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
