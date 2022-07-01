@@ -1,8 +1,10 @@
 import argparse
 import logging
+import os
 import threading
 import sys
 
+import PyQt5
 from PyQt5.QtWidgets import QApplication
 
 from client.client_db import ClientDatabase
@@ -53,6 +55,11 @@ def main():
 
     client_name, server_address, server_port, client_passwd = client_arg_parser()
 
+    # Без добавления пути не находит плагин для запуска QApplication!
+    dir_name = os.path.dirname(PyQt5.__file__)
+    plugin_path = os.path.join(dir_name, 'Qt5', 'plugins', 'platforms')
+    os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
+    # **********************************************
     # Создаём клиентокое приложение
     client_app = QApplication(sys.argv)
 
